@@ -1,0 +1,33 @@
+ push 10
+dump
+push [20]
+dump
+ add
+dump
+push rcx
+dump
+ push [rdx]
+dump
+ add
+dump
+div
+dump
+ out
+dump
+in
+dump
+dup
+dump
+ add
+dump
+in
+dump
+dup
+dump
+ add
+dump
+add
+dump
+out
+dump
+hlt
