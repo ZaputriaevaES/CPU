@@ -3,6 +3,7 @@
 #define DEF_CMD(name, num, arg, ...) \
     case num:                        \
         {                            \   
+            if(num == PUSH) printf("PUSH\n");\
             __VA_ARGS__              \   
             break;                   \       
         }  
@@ -133,7 +134,7 @@ void command_execution(struct Text * translated_file, FILE * processor_output, s
         
         */
         }
-        
+        #undef DEF_CMD
     }
 }
 /*

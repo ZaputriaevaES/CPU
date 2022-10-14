@@ -11,6 +11,8 @@
 
 #include "C:\Users\zaput\Documents\CPU\utilities.h"
 
+typedef int Elem_t;
+
 /*
 #define ARG_IMMED 0x20
 #define ARG_REG   0x40
@@ -28,6 +30,13 @@ struct label{
     int    hop_address;
     char * literal_mean;
     };
+
+struct assemb{
+    struct label * array_of_labels;
+    int *  command_array;
+    Elem_t Regs[4] = {17,18,19,20};
+};    
+   
 
 #define    PUSH_mrI  ARG_IMMED +             1
 #define    PUSH_mRi  ARG_REG   +             1
@@ -76,16 +85,17 @@ enum regs{
 #define MAX_LABEL_LENGTH 20
 */
 
-typedef int Elem_t;
 
+
+void   get_args             (char * line, size_t * number_of_cmd, int cmd_name,  struct assemb * assembler);
 void   finish_program       (struct Text * original_file, struct label * array_of_labels, FILE * assembler_output);
-void   start_program        (const char * nameReadFile, struct Text * original_file, FILE * assembler_input, struct label ** array_of_labels);
+void   start_program        (const char * nameReadFile, struct Text * original_file, FILE * assembler_input, struct assemb * assembler);
 void   label_array_output   (struct label * array_of_labels);
 char   * command_decoder    (int cmd);
 void   listing_output       (int * command_array, int number_of_cmd);
 int    label_search         (int label, struct label * array_of_labels);
 void   add_label_to_array   (int label, int number_of_cmd, struct label * array_of_labels);
-void   file_compilation     (struct Text * original_file, FILE * assembler_output, struct label * array_of_labels, int compile_number, Elem_t * Regs);
+void   file_compilation     (struct Text * original_file, FILE * assembler_output, int compile_number, struct assemb * assembler);
 void   createArrayOfStrings (const size_t strNum, char * pBUF, char ** textStruct);
 char * createBufferWithFread(const char * nameReadFile, size_t * elements, FILE * readFile, size_t * strNum);
 size_t fileSizeDetection    (const char * nameReadFile, FILE * read);

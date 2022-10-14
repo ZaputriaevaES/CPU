@@ -3,7 +3,6 @@
 #define ARG_REG   0x40
 #define ARG_REM   0x80
 
-
 #define DEF_CMD(name, num, arg, ...) name = num,
 
 enum cmd{

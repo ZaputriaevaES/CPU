@@ -9,16 +9,23 @@ int main()
     FILE * assembler_input  = fopen(nameReadFile, "r");
     FILE * assembler_output = fopen(nameWriteFile, "wb+");
 
-    Elem_t Regs[4]           = {3, 8, 2, 5};
+    //Elem_t Regs[4] = {3, 8, 2, 5};
 
     struct Text original_file = {NULL, NULL, 0, 0};
 
-    struct label * array_of_labels  = NULL;
+    //struct label * array_of_labels = NULL;
 
-    start_program(nameReadFile, &original_file, assembler_input, &array_of_labels);
+    struct assemb assembler = {};
 
-    file_compilation(&original_file, assembler_output, array_of_labels, 1, Regs);
-    file_compilation(&original_file, assembler_output, array_of_labels, 2, Regs);
+    for(int i = 0; i < 4; i++)
+    {
+        printf("-- %d -- \n", assembler.Regs[i]);
+    }
 
-    finish_program(&original_file, array_of_labels, assembler_output);
+    start_program(nameReadFile, &original_file, assembler_input,  &assembler);
+
+    file_compilation(&original_file, assembler_output, 1, &assembler);
+    file_compilation(&original_file, assembler_output, 2, &assembler);
+
+    finish_program(&original_file, assembler.array_of_labels, assembler_output);
 }

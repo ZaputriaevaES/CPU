@@ -5,8 +5,9 @@ FILE * logFile = fileCtor(logFileName);
 
 int main()
 {
-    const char * nameReadFile =  "C://Users//zaput//Documents//CPU//PROCESSOR//processor_input.txt";
+    //const char * nameReadFile =  "C://Users//zaput//Documents//CPU//PROCESSOR//processor_input.txt";
     const char * nameWriteFile = "C://Users//zaput//Documents//CPU//PROCESSOR//processor_output.txt";
+    const char * nameReadFile =  "C://Users//zaput//Documents//CPU////ASSEMBLER//assembler_output.txt";
 
     FILE * processor_input  = fopen(nameReadFile, "r");
     FILE * processor_output = fopen(nameWriteFile, "w+");
