@@ -16,7 +16,10 @@
 
 struct Text{
     Elem_t * commands_array;
-    size_t amount_of_cmd;
+    size_t   amount_of_cmd;
+    stack_t  call_stack;
+    int      Regs[4] = {5, 10, 3, 7};
+    int      RAM[MAX_RAM_SIZE];
     };
 
 /*
@@ -57,11 +60,13 @@ enum regs{
 //#define
 */
 
+void start_program(struct Text * my_cpu, stack_t * stack1, const char * nameReadFile, FILE * processor_input);
 void push_check(Elem_t * code, size_t * ip);
-void command_execution(struct Text * translated_file, FILE * processor_output, stack_t * stack, Elem_t * Regs, Elem_t * RAM);
-void create_array_of_commands(char * buffer, struct Text * translated_file);
-char * input_file_verification(char * buffer, struct Text * translated_file);
+void command_execution(struct Text * my_cpu, FILE * processor_output, stack_t * stack);
+void create_array_of_commands(char * buffer, struct Text * my_cpu);
+char * input_file_verification(char * buffer, struct Text * my_cpu);
 char * createBufferWithFread(const char * nameReadFile, size_t * elements, FILE * readFile);
 size_t fileSizeDetection(const char * nameReadFile, FILE * read);
+void finish_program(FILE * processor_output, stack_t * stack1, FILE * logFile, struct Text * my_cpu);
 
 #endif // PROCESSOS_FUNCTIONS_H_INCLUDED

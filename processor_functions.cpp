@@ -1,18 +1,42 @@
 #include "processor_functions.h"
 
+void start_program(struct Text * my_cpu, stack_t * stack1, const char * nameReadFile, FILE * processor_input)
+{
+    stack_t * call_stack = &(my_cpu->call_stack);
+
+    stackCtor (*stack1, 6);     //сделать сигнатуру как число
+    stackCtor (*call_stack, 6);    
+
+    char * buffer = createBufferWithFread(nameReadFile, &(my_cpu->amount_of_cmd), processor_input);
+
+    fclose(processor_input);
+
+    buffer = input_file_verification(buffer, my_cpu);
+
+    printf("%s\n", buffer);
+
+    create_array_of_commands(buffer, my_cpu);
+
+}
+
 #define DEF_CMD(name, num, arg, ...) \
     case num:                        \
         {                            \   
-            if(num == PUSH) printf("PUSH\n");\
+            if(num == HLT) printf("HLT\n");\
             __VA_ARGS__              \   
             break;                   \       
         }  
 
-void command_execution(struct Text * translated_file, FILE * processor_output, stack_t * stack, Elem_t * Regs, Elem_t * RAM)
+void command_execution(struct Text * my_cpu, FILE * processor_output, stack_t * stack)
 {
-    for(size_t ip = 0; ip < translated_file->amount_of_cmd; ip++)
+    //for(int i = 0; i < my_cpu->amount_of_cmd; i++) printf("%d ", my_cpu->commands_array[i]);
+    //("\n");
+
+        stack_t call_stack = {};//&my_cpu->call_stack;
+        stackCtor (call_stack, 16);    
+    for(size_t ip = 0; ip < my_cpu->amount_of_cmd; ip++)
     {
-        switch((translated_file->commands_array[ip]) & 31)
+        switch((my_cpu->commands_array[ip]) & 31)
         {
             #include "C:\Users\zaput\Documents\CPU\cmd.h"    
         /*    
@@ -133,8 +157,14 @@ void command_execution(struct Text * translated_file, FILE * processor_output, s
             printf("no such command exists");
         
         */
+        default:
+            { 
+            printf("no such command\n");
+            printf("in command = %d (full : %d)\n", (my_cpu->commands_array[ip]) & 31, my_cpu->commands_array[ip]);
+            }
         }
         #undef DEF_CMD
+
     }
 }
 /*
@@ -150,7 +180,7 @@ Elem_t push_check(Elem_t * code, size_t * ip)
     stackPush(code, arg);
 }
 */
-char * input_file_verification(char * buffer, struct Text * translated_file)
+char * input_file_verification(char * buffer, struct Text * my_cpu)
 {
     char sign[5] = "";
     int n = 0;
@@ -175,27 +205,31 @@ char * input_file_verification(char * buffer, struct Text * translated_file)
 
     buffer += 2;
 
-    sscanf(buffer, "%d", &translated_file->amount_of_cmd);
+    sscanf(buffer, "%d", &my_cpu->amount_of_cmd);
 
-    buffer += 2;
+    buffer += 3;
+
+    //printf("%s\n", buffer);
 
     return buffer;
 }
 
-void create_array_of_commands(char * buffer, struct Text * translated_file)
+void create_array_of_commands(char * buffer, struct Text * my_cpu)
 {
-    translated_file->commands_array  =  (int *)calloc(translated_file->amount_of_cmd, sizeof(int));
-    assert(translated_file->commands_array != NULL);
+    my_cpu->commands_array  =  (int *)calloc(my_cpu->amount_of_cmd, sizeof(int));
+    assert(my_cpu->commands_array != NULL);
 
-    for(size_t i = 0; i < translated_file->amount_of_cmd; i++)
+    for(size_t i = 0; i < my_cpu->amount_of_cmd; i++)
     {
-        int n = 0;
-        sscanf(buffer, "%d%n", &translated_file->commands_array[i], &n);
+        int n = -1;
+        sscanf(buffer, "%d%n", &my_cpu->commands_array[i], &n);
 
-        //printf("%d ", translated_file->commands_array[i]);
+        printf("%d ", my_cpu->commands_array[i]);
 
         buffer += n;
-    }
+    }   
+
+    free(buffer);
 }
 
 char * createBufferWithFread(const char * nameReadFile, size_t * elements, FILE * readFile)
@@ -213,7 +247,7 @@ char * createBufferWithFread(const char * nameReadFile, size_t * elements, FILE 
     buffer = (char *)realloc(buffer, (*elements) * sizeof(char));
 
     assert(buffer != NULL);
-
+    //printf("%s\n", buffer);
     return buffer;
 }
 
@@ -228,4 +262,14 @@ size_t fileSizeDetection(const char * nameReadFile, FILE * read)
     off_t fsize = stbuf.st_size;
 
     return fsize / sizeof(char) ;
+}
+
+void finish_program(FILE * processor_output, stack_t * stack1, FILE * logFile, struct Text * my_cpu)
+{
+    fclose(processor_output);
+
+    stackDtor (stack1);
+    fileDtor(logFile);
+
+    free(my_cpu->commands_array);
 }

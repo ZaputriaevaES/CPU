@@ -86,7 +86,7 @@ enum regs{
 */
 
 
-
+int    check_what_not_adress(int cmd, struct assemb * assembler);
 void   get_args             (char * line, size_t * number_of_cmd, int cmd_name,  struct assemb * assembler);
 void   finish_program       (struct Text * original_file, struct label * array_of_labels, FILE * assembler_output);
 void   start_program        (const char * nameReadFile, struct Text * original_file, FILE * assembler_input, struct assemb * assembler);

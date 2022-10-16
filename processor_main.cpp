@@ -12,35 +12,31 @@ int main()
     FILE * processor_input  = fopen(nameReadFile, "r");
     FILE * processor_output = fopen(nameWriteFile, "w+");
 
-    struct Text translated_file = {NULL, 0};
+    struct Text my_cpu = {};//{NULL, 0, 0, 0, 0};
 
-    stack_t stack1 = {};       //общая функция открытия и инициализации всего
+    stack_t stack1 = {};   
+/* 
     stackCtor (stack1, 6);     //сделать сигнатуру как число
-    Elem_t value = 0;
+    stackCtor (my_cpu.call_stack, 6);    
 
-    Elem_t RAM[MAX_RAM_SIZE] = {0};
-
-    Elem_t Regs[4] = {3, 8, 2, 4};
+    //Elem_t value = 0;
+    //Elem_t RAM[MAX_RAM_SIZE] = {0};
+    //Elem_t Regs[4] = {3, 8, 2, 4};
 
 //--------------------------------Создание буфера с помощью fread------------------------------------------------------
 
-    char * buffer = createBufferWithFread(nameReadFile, &translated_file.amount_of_cmd, processor_input);
+    char * buffer = createBufferWithFread(nameReadFile, &my_cpu.amount_of_cmd, processor_input);
 
     fclose(processor_input);
 
-    buffer = input_file_verification(buffer, &translated_file);
+    buffer = input_file_verification(buffer, &my_cpu);
 
-    create_array_of_commands(buffer, &translated_file);
+    create_array_of_commands(buffer, &my_cpu);
+*/
+    start_program(&my_cpu, &stack1, nameReadFile, processor_input);
 
-    command_execution(&translated_file, processor_output, &stack1, Regs, RAM);
+    command_execution(&my_cpu, processor_output, &stack1);
 
-    fclose(processor_output);
-
-    stackDtor (&stack1);
-    fileDtor(logFile);
-
-    free(buffer);
-    free(translated_file.commands_array);
-
+    finish_program(processor_output, &stack1, logFile, &my_cpu);
     return 0;
 }

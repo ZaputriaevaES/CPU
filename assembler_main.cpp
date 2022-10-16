@@ -2,7 +2,6 @@
 
 int main()
 {
-
     const char * nameReadFile =  "C://Users//zaput//Documents//CPU//ASSEMBLER//assembler_input.txt";
     const char * nameWriteFile = "C://Users//zaput//Documents//CPU//ASSEMBLER//assembler_output.txt";
 

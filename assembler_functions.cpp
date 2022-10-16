@@ -60,12 +60,6 @@ void file_compilation(struct Text * original_file, FILE * assembler_output, int 
                     //printf("###  label : %d ###\n",num_label);
 
                     add_label_to_array(num_label, number_of_cmd, assembler->array_of_labels);
-
-                    if(compile_number == 1)
-                    {
-                        assembler->command_array[number_of_cmd] = num_label;
-                        number_of_cmd += 1;
-                    }
                 }
                 else
                 {
@@ -85,14 +79,15 @@ void file_compilation(struct Text * original_file, FILE * assembler_output, int 
         
     }
 
-    //for(int i = 0; i < number_of_cmd; i++)
-    //{
-    //     printf("%5d", assembler->command_array[i]);
-    //}
-    //printf("\n");
+    for(int i = 0; i < number_of_cmd; i++)
+    {
+         printf("%5d", assembler->command_array[i]);
+    }
+    printf("\n");
 
-    listing_output(assembler->command_array, number_of_cmd);
     label_array_output(assembler->array_of_labels);
+    listing_output(assembler->command_array, number_of_cmd);
+
 
     if(compile_number == 2)
     {
@@ -100,11 +95,39 @@ void file_compilation(struct Text * original_file, FILE * assembler_output, int 
 
         for(size_t i = 0; i < number_of_cmd; i++)
         {
+        /*
+       else if(command_array[cmd] == JMP || command_array[cmd] == JB || command_array[cmd] == JBE || command_array[cmd] == JA || command_array[cmd] == JAE || command_array[cmd] == JN || command_array[cmd] == JNE )
+       {
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, JMP, command_array[cmd + 1], "JUMP", command_array[cmd + 1]); 
+            cmd++;
+
+            fprintf(assembler_output, "%d ", assembler->command_array[i]);
+       }
+
+       else if(command_array[cmd] == CALL)
+       {
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, CALL, command_array[cmd + 1], "CALL", command_array[cmd + 1]); 
+            cmd++;
+       }               
+        */    
             fprintf(assembler_output, "%d ", assembler->command_array[i]);
         }
 
         free(assembler->command_array);
     }
+}
+
+int check_what_not_adress(int cmd, struct assemb * assembler)
+{
+    for(int i = 0; i < MAX_NUMBER_OF_LABELS; i++)
+    {
+        if((assembler->array_of_labels[i]).hop_address != -1)
+        {
+            printf("lab = %d, h.a. = %d\n", (assembler->array_of_labels[i]).hop_address);
+        }
+    }
+    printf("\n--------\n");
+    return 1;
 }
 
 void get_args(char * line, size_t * number_of_cmd, int cmd_name, struct assemb * assembler)
@@ -123,7 +146,6 @@ void get_args(char * line, size_t * number_of_cmd, int cmd_name, struct assemb *
             {
                 assembler->command_array[*number_of_cmd] = PUSH_MrI;
                 assembler->command_array[*number_of_cmd + 1] = val;
-
             }
             else
             {
@@ -178,6 +200,28 @@ void get_args(char * line, size_t * number_of_cmd, int cmd_name, struct assemb *
             int label = 0;
             sscanf(line + 2, "%d", &label);
 
+
+            assembler->command_array[*number_of_cmd + 1] = label_search(label, assembler->array_of_labels);
+
+            printf("\n==== label = %d , adress = %d ===\n", label, label_search(label, assembler->array_of_labels));
+        }
+
+        else
+        {
+            int label = 0;
+            sscanf(line + 1, "%d", &label);
+
+            assembler->command_array[*number_of_cmd + 1] = label;
+        }
+
+    }
+    else if(cmd_name == CALL)
+    {
+        if(strchr(line + 1, ':') != NULL)
+        {
+            int label = 0;
+            sscanf(line + 2, "%d", &label);
+
             assembler->command_array[*number_of_cmd + 1] = label_search(label, assembler->array_of_labels);
 
             printf("\n==== %d ===\n", label);
@@ -190,39 +234,8 @@ void get_args(char * line, size_t * number_of_cmd, int cmd_name, struct assemb *
 
             assembler->command_array[*number_of_cmd + 1] = label;
         }
+    }        
 
-    }
-    /*
-    else if(cmd_name == JB)
-    {
-
-    }
-
-    else if(cmd_name == JBE)
-    {
-
-    }
-
-    else if(cmd_name == JA)
-    {
-
-    }
-
-    else if(cmd_name == JAE)
-    {
-
-    }
-
-    else if(cmd_name == JE)
-    {
-
-    }
-
-    else if(cmd_name == JNE)
-    {
-
-    }
-    */
     else
     {printf("ERROR CMD");}
 
@@ -307,39 +320,45 @@ void listing_output(int * command_array, int number_of_cmd)
 
        else if(command_array[cmd] == JB)
        {
-            printf("%04d  %02d %2d  --  %s %d\n", cmd, JMP, command_array[cmd + 1], "JB", command_array[cmd + 1]); 
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, JB, command_array[cmd + 1], "JB", command_array[cmd + 1]); 
             cmd++;
        }
 
        else if(command_array[cmd] == JBE)
        {
-            printf("%04d  %02d %2d  --  %s %d\n", cmd, JMP, command_array[cmd + 1], "JBE", command_array[cmd + 1]); 
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, JBE, command_array[cmd + 1], "JBE", command_array[cmd + 1]); 
             cmd++;
        }
 
        else if(command_array[cmd] == JA)
        {
-            printf("%04d  %02d %2d  --  %s %d\n", cmd, JMP, command_array[cmd + 1], "JA", command_array[cmd + 1]); 
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, JA, command_array[cmd + 1], "JA", command_array[cmd + 1]); 
             cmd++;
        }
        
        else if(command_array[cmd] == JAE)
        {
-            printf("%04d  %02d %2d  --  %s %d\n", cmd, JMP, command_array[cmd + 1], "JAE", command_array[cmd + 1]); 
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, JAE, command_array[cmd + 1], "JAE", command_array[cmd + 1]); 
             cmd++;
        }
 
        else if(command_array[cmd] == JE)
        {
-            printf("%04d  %02d %2d  --  %s %d\n", cmd, JMP, command_array[cmd + 1], "JE", command_array[cmd + 1]); 
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, JE, command_array[cmd + 1], "JE", command_array[cmd + 1]); 
             cmd++;
        }
        
        else if(command_array[cmd] == JNE)
        {
-            printf("%04d  %02d %2d  --  %s %d\n", cmd, JMP, command_array[cmd + 1], "JNE", command_array[cmd + 1]); 
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, JNE, command_array[cmd + 1], "JNE", command_array[cmd + 1]); 
             cmd++;
        }
+
+       else if(command_array[cmd] == CALL)
+       {
+            printf("%04d  %02d %2d  --  %s %d\n", cmd, CALL, command_array[cmd + 1], "CALL", command_array[cmd + 1]); 
+            cmd++;
+       }       
 
        else
        {
@@ -403,6 +422,11 @@ char * command_decoder(int cmd)
                     return "dup";
                     break;
                 }
+            case RET:
+                {
+                    return "ret";
+                    break;  
+                }    
             default:
                 return "no such command exists";
             }
