@@ -18,7 +18,7 @@ struct Text{
     Elem_t * commands_array;
     size_t   amount_of_cmd;
     stack_t  call_stack;
-    int      Regs[4] = {5, 10, 3, 7};
+    int      Regs[4] = {5, 15, 3, 7};
     int      RAM[MAX_RAM_SIZE];
     };
 

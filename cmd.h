@@ -5,33 +5,48 @@ DEF_CMD(PUSH, 1, 1,
             Elem_t cmd = code[ip++];
             Elem_t arg = 0;
 
-            if     ((cmd & ARG_IMMED)>>5) arg = code[ip++];
-            else if((cmd & ARG_REG)>>6)   arg = my_cpu->Regs[code[ip++]];
-            else if((cmd & ARG_REM)>>7)   arg = my_cpu->RAM[arg];
-            else   printf("invalid arg in cmd_num = %d\n", ip);
+            //printf("\n push_cmp = %d, I = %d, R = %d, M = %d\n", cmd, cmd & ARG_IMMED, cmd & ARG_REG, cmd & ARG_REM);
 
-            printf("push(cmd=) %d, IMR = %d, arg = %d\n", code[ip-2], (cmd & ARG_IMMED)>>5, code[ip-1]);
+            if((cmd & ARG_IMMED)>>5) arg += code[ip];
+            if((cmd & ARG_REG)>>6)   arg += my_cpu->Regs[code[ip]];
+            if((cmd & ARG_REM)>>7)   arg  = my_cpu->RAM[arg];
+            //else   printf("invalid arg in cmd_num = %d\n", ip);
+
+            //printf("push(cmd=) %d, I = %d, R = %d, M = %d, arg = %d / %d\n", code[ip-1], (cmd & ARG_IMMED)>>5, (cmd & ARG_REG)>>6, (cmd & ARG_REM)>>7, code[ip], arg);
 
             stackPush(stack, arg);
-            ip--;
+            //ip--;
             break;
             })
 
-DEF_CMD(POP, 2, 0,
+DEF_CMD(POP, 2, 1,
 {
             Elem_t value = 0;
             stackPop (stack, &value);
-/*
-            if ((cmd & ARG_REM)>>7)                                
+            
+            Elem_t * code = my_cpu->commands_array;
+
+            Elem_t cmd = code[ip++];
+
+            printf("\n pop_cmp = %d, I = %d, R = %d, M = %d\n", cmd, cmd & ARG_IMMED, cmd & ARG_REG, cmd & ARG_REM);
+
+            if ((cmd & ARG_REM)>>7)   //pop [10]  -> pop 10                           
             {                                                     
-                int ram_ind = ;     
+                int ram_ind = code[ip];     
                 my_cpu->RAM[ram_ind] = value;                  
             }                                                     
-            else                                                  
+            else          //pop rax  -> pop 1                                      
             {                                                     
-                int reg = my_cpu->code[ip++];                     
+                int reg = code[ip];
+                printf("old_reg = %d, reg = %d; ", my_cpu->Regs[reg], code[ip]);                                     
                 my_cpu->Regs[reg] = value; 
-*/
+                printf("new_reg = %d, value = %d\n", my_cpu->Regs[reg], value);
+            }
+
+            printf("pop(cmd=) %d, I = %d, R = %d, M = %d, arg = %d\n", code[ip-1], (cmd & ARG_IMMED)>>5, (cmd & ARG_REG)>>6, (cmd & ARG_REM)>>7, code[ip]);
+
+            //ip--;
+            
             break;
 })
 
@@ -82,7 +97,7 @@ DEF_CMD(OUT, 7, 0,
 DEF_CMD(HLT, 8, 0,
             {
             printf("goodbye");
-            exit(0);
+            //exit(0);
             break;
             })
 
@@ -129,6 +144,7 @@ DEF_CMD(JB, 13, 1,
             stackPop (stack, &a);
             stackPop (stack, &b);
             if(b < a) ip = my_cpu->commands_array[ip + 1] - 1;
+            else ip++;
             
             break;               
             }) 
@@ -139,7 +155,8 @@ DEF_CMD(JBE, 14, 1,
             Elem_t b = 0;
             stackPop (stack, &a);
             stackPop (stack, &b);
-            if(b <= a) ip = my_cpu->commands_array[ip + 1] - 1;
+            if(b <= a) ip = my_cpu->commands_array[++ip] - 1;
+            else ip++;
             break;               
             }) 
 
@@ -150,6 +167,7 @@ DEF_CMD(JA, 15, 1,
             stackPop (stack, &a);
             stackPop (stack, &b);
             if(b > a) ip = my_cpu->commands_array[ip + 1] - 1;
+            else ip++;
             break;               
             }) 
 
@@ -160,6 +178,7 @@ DEF_CMD(JAE, 16, 1,
             stackPop (stack, &a);
             stackPop (stack, &b);
             if(b >= a) ip = my_cpu->commands_array[ip + 1] - 1;
+            else ip++;
             break;               
             }) 
 
@@ -170,6 +189,7 @@ DEF_CMD(JE, 17, 1,
             stackPop (stack, &a);
             stackPop (stack, &b);
             if(b == a) ip = my_cpu->commands_array[ip + 1] - 1 ;
+            else ip++;
             break;               
             }) 
 
@@ -180,6 +200,7 @@ DEF_CMD(JNE, 18, 1,
             stackPop (stack, &a);
             stackPop (stack, &b);
             if(b != a) ip = my_cpu->commands_array[ip + 1] - 1;
+            else ip++;
             break;               
             })
 

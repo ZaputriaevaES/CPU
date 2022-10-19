@@ -42,6 +42,6 @@ enum regs{
 
 #define SIGNATURE "CP"
 //#define VERSION 1
-#define MAX_RAM_SIZE 100
+#define MAX_RAM_SIZE 20
 #define MAX_NUMBER_OF_LABELS 20
 #define MAX_LABEL_LENGTH 20

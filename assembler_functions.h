@@ -27,8 +27,8 @@ struct Text{
     };
 
 struct label{
-    int    hop_address;
-    char * literal_mean;
+    int  hop_address;
+    char literal_mean[MAX_LABEL_LENGTH];
     };
 
 struct assemb{
@@ -42,6 +42,9 @@ struct assemb{
 #define    PUSH_mRi  ARG_REG   +             1
 #define    PUSH_MrI  ARG_REM   + ARG_IMMED + 1
 #define    PUSH_MRi  ARG_REM   + ARG_REG   + 1
+
+#define    POP_MrI   ARG_REM   + ARG_IMMED + 2
+#define    POP_mRi   ARG_REG   +             2
 
 /*
 enum commands{
@@ -86,6 +89,7 @@ enum regs{
 */
 
 
+int    text_label_search    (char * text_lebel, struct label * array_of_labels);
 int    check_what_not_adress(int cmd, struct assemb * assembler);
 void   get_args             (char * line, size_t * number_of_cmd, int cmd_name,  struct assemb * assembler);
 void   finish_program       (struct Text * original_file, struct label * array_of_labels, FILE * assembler_output);

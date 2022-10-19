@@ -37,6 +37,20 @@ int main()
 
     command_execution(&my_cpu, processor_output, &stack1);
 
+    printf("\n------------RAM(main)------------------\n");
+    for(int i = 0; i < MAX_RAM_SIZE; i++)
+    {
+        printf("[%2d] = %20d; ", i, my_cpu.RAM[i]);
+    }
+    printf("\n---------------------------------------\n"); 
+
+    printf("\n------------REGS(main)-----------------\n");
+    for(int i = 0; i < 4; i++)
+    {
+        printf("[%2d] = %20d; ", i, my_cpu.Regs[i]);
+    }
+    printf("\n---------------------------------------\n"); 
+
     finish_program(processor_output, &stack1, logFile, &my_cpu);
     return 0;
 }

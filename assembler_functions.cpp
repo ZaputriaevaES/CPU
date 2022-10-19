@@ -42,13 +42,16 @@ void file_compilation(struct Text * original_file, FILE * assembler_output, int 
     assembler->command_array = (int *)calloc(original_file->amountOfStrings*2, sizeof(int));
     assert(assembler->command_array != NULL);
 
+    int number_of_string_labels = 0;
+
     for(int line = 0; line < original_file->amountOfStrings; line++)
     {
         char cmd[20] = "";
 
         int n = 0;
         sscanf(original_file->strings[line], "%19s%n", cmd, &n);
-
+        
+        
         //printf("%d - %s\n", line, cmd);
 
         if(strchr(cmd, ':') != NULL)
@@ -61,10 +64,20 @@ void file_compilation(struct Text * original_file, FILE * assembler_output, int 
 
                     add_label_to_array(num_label, number_of_cmd, assembler->array_of_labels);
                 }
+                else if(sscanf(original_file->strings[line], "%s", assembler->array_of_labels[number_of_string_labels].literal_mean))
+                {
+                    int len = strlen(assembler->array_of_labels[number_of_string_labels].literal_mean);
+                    (assembler->array_of_labels[number_of_string_labels].literal_mean)[len-1] = '\0';
+
+                    add_label_to_array(number_of_string_labels, number_of_cmd, assembler->array_of_labels);
+                    //add_str_label_to_array(number_of_string_labels, number_of_cmd, assembler->array_of_labels);
+                    //printf("%d_th find text label = %s\n", number_of_string_labels, assembler->array_of_labels[number_of_string_labels].literal_mean);
+                    number_of_string_labels++; 
+                    //printf("==== nosl = %d ===\n", number_of_string_labels);
+                }
                 else
                 {
-                    char str_label[MAX_LABEL_LENGTH] = "";
-                    sscanf(original_file->strings[line], "%s", str_label);
+                    printf("invalid label format\n");
                 }
             }            
         
@@ -74,20 +87,21 @@ void file_compilation(struct Text * original_file, FILE * assembler_output, int 
 
         else
             {
-                printf("no such command exists, number_of_cmd = %d\n", number_of_cmd);
+                printf("no such command exists, number_of_cmd = %d cmd = %s \n", number_of_cmd, cmd);
             }
         
     }
-
+    /*
     for(int i = 0; i < number_of_cmd; i++)
     {
          printf("%5d", assembler->command_array[i]);
     }
     printf("\n");
-
+    */
     label_array_output(assembler->array_of_labels);
     listing_output(assembler->command_array, number_of_cmd);
 
+    //printf("text_label = %s\n", assembler->array_of_labels[0].literal_mean);
 
     if(compile_number == 2)
     {
@@ -139,17 +153,17 @@ void get_args(char * line, size_t * number_of_cmd, int cmd_name, struct assemb *
     {
          if(strchr(line, '[') != NULL)
         {
-
             int val = 0;
 
-            if(sscanf(line + 2, "%d", &val))
+            if(sscanf(line + 2, "%d", &val)) //push[10]
             {
+                printf("in cmd = %d, PUSH_MrI[%d]\n", *number_of_cmd, val);
                 assembler->command_array[*number_of_cmd] = PUSH_MrI;
                 assembler->command_array[*number_of_cmd + 1] = val;
             }
-            else
+            else   //push[rax]
             {
-                assembler->command_array[*number_of_cmd] = PUSH_MrI;
+                assembler->command_array[*number_of_cmd] = PUSH_MRi;
                 char arg[4] = "";
                 sscanf(line + 2, "%s", arg);
 
@@ -169,12 +183,12 @@ void get_args(char * line, size_t * number_of_cmd, int cmd_name, struct assemb *
 
             int val = 0;
 
-            if(sscanf(line + 1, "%d", &val))
+            if(sscanf(line + 1, "%d", &val))  //push 10
             {
                 assembler->command_array[*number_of_cmd] = PUSH_mrI;
                 assembler->command_array[*number_of_cmd + 1] = val;
             }
-            else
+            else  //push rax
             {
                 assembler->command_array[*number_of_cmd] = PUSH_mRi;
                 char arg[4] = "";
@@ -193,17 +207,24 @@ void get_args(char * line, size_t * number_of_cmd, int cmd_name, struct assemb *
 
 
     }
-    else if(cmd_name == JMP || cmd_name == JB || cmd_name == JBE || cmd_name == JA || cmd_name == JAE || cmd_name == JE || cmd_name == JNE)
+    else if(cmd_name == JMP || cmd_name == JB || cmd_name == JBE || cmd_name == JA || cmd_name == JAE || cmd_name == JE || cmd_name == JNE || cmd_name == CALL)
     {
         if(strchr(line + 1, ':') != NULL)
         {
             int label = 0;
-            sscanf(line + 2, "%d", &label);
-
-
-            assembler->command_array[*number_of_cmd + 1] = label_search(label, assembler->array_of_labels);
-
-            printf("\n==== label = %d , adress = %d ===\n", label, label_search(label, assembler->array_of_labels));
+            if(sscanf(line + 2, "%d", &label))
+            {
+                assembler->command_array[*number_of_cmd + 1] = label_search(label, assembler->array_of_labels);
+            }
+            else
+            {
+                char text_lebel[MAX_LABEL_LENGTH];
+                if(sscanf(line + 2, "%s", text_lebel))
+                {
+                    assembler->command_array[*number_of_cmd + 1] = text_label_search(text_lebel, assembler->array_of_labels);
+                }
+            }
+            //printf("\n==== label = %d , adress = %d ===\n", label, label_search(label, assembler->array_of_labels));
         }
 
         else
@@ -215,27 +236,34 @@ void get_args(char * line, size_t * number_of_cmd, int cmd_name, struct assemb *
         }
 
     }
-    else if(cmd_name == CALL)
+    else if(cmd_name == POP)       
     {
-        if(strchr(line + 1, ':') != NULL)
+    if(strchr(line, '[') != NULL)  //pop [10]
         {
-            int label = 0;
-            sscanf(line + 2, "%d", &label);
+            int val = 0;
 
-            assembler->command_array[*number_of_cmd + 1] = label_search(label, assembler->array_of_labels);
-
-            printf("\n==== %d ===\n", label);
+            sscanf(line + 2, "%d", &val);
+            assembler->command_array[*number_of_cmd] = POP_MrI; //
+            assembler->command_array[*number_of_cmd + 1] = val;
         }
+    else  //pop rax
+    {
+        assembler->command_array[*number_of_cmd] = POP_mRi; //
+        char arg[4] = "";
+        sscanf(line + 1, "%s", arg);
 
-        else
-        {
-            int label = 0;
-            sscanf(line + 1, "%d", &label);
+        if     (strncmp(arg, "rax", 3) == 0)
+            assembler->command_array[*number_of_cmd + 1] = REG_RAX;
+        else if(strncmp(arg, "rbx", 3) == 0)
+            assembler->command_array[*number_of_cmd + 1] = REG_RBX;
+        else if(strncmp(arg, "rcx", 3) == 0)
+            assembler->command_array[*number_of_cmd + 1] = REG_RCX;
+        else if(strncmp(arg, "rdx", 3) == 0)
+            assembler->command_array[*number_of_cmd + 1] = REG_RDX;
+    }
 
-            assembler->command_array[*number_of_cmd + 1] = label;
-        }
-    }        
-
+    }
+    
     else
     {printf("ERROR CMD");}
 
@@ -271,7 +299,21 @@ void add_label_to_array(int label, int number_of_cmd, struct label * array_of_la
     }
 
 }
-
+/*
+void add_str_label_to_array(size_t number_of_string_labels, int number_of_cmd, struct label * array_of_labels)
+{
+    if(number_of_string_labels < MAX_NUMBER_OF_LABELS)
+    {
+        (array_of_labels[number_of_string_labels]).hop_address = number_of_cmd;
+        //printf("hop_adresss = %d\n", (array_of_labels[label]).hop_address);
+    }    
+    else
+    {
+        printf("you have exceeded the maximum number of tags");
+        abort();
+    }
+}
+*/
 int label_search(int label, struct label * array_of_labels)
 {
     if(label < MAX_NUMBER_OF_LABELS)
@@ -284,10 +326,26 @@ int label_search(int label, struct label * array_of_labels)
 
 }
 
+int text_label_search(char * text_lebel, struct label * array_of_labels)
+{
+    for(int i = 0; i <= MAX_NUMBER_OF_LABELS; i++)
+    {
+        //printf("%d_th t_l = %s ~~ %s\n", i, array_of_labels[i].literal_mean, text_lebel);
+        if(strncmp(text_lebel, array_of_labels[i].literal_mean, MAX_LABEL_LENGTH) == NULL)
+        {
+            //printf("%d_th mas text label = %s hop_adress = %d\n", i, array_of_labels[i].literal_mean, array_of_labels[i].hop_address);
+            return array_of_labels[i].hop_address; 
+        }
+    } 
+    printf("!!! text_label not found !!!\n");
+    return 0;   
+}
+
 void listing_output(int * command_array, int number_of_cmd)
 {
     for(int cmd = 0; cmd < number_of_cmd; cmd++)
     {
+        //printf("cmd = %7d  ", command_array[cmd]);
        if(command_array[cmd] == PUSH_mrI)
        {
             printf("%04d  %02d %2d  --  %s %d\n", cmd, PUSH_mrI, command_array[cmd + 1], "PUSH_mrI", command_array[cmd + 1]);
@@ -359,6 +417,18 @@ void listing_output(int * command_array, int number_of_cmd)
             printf("%04d  %02d %2d  --  %s %d\n", cmd, CALL, command_array[cmd + 1], "CALL", command_array[cmd + 1]); 
             cmd++;
        }       
+
+       else if(command_array[cmd] == POP_MrI)
+       {
+           printf("%04d  %02d %2d  --  %s %d\n", cmd, POP_MrI, command_array[cmd + 1], "POP_MrI", command_array[cmd + 1]);
+            cmd++;
+       }
+
+       else if(command_array[cmd] == POP_mRi)
+       {
+           printf("%04d  %02d %2d  --  %s %d\n", cmd, POP_mRi, command_array[cmd + 1], "POP_mRi", command_array[cmd + 1]);
+            cmd++;
+       }
 
        else
        {

@@ -17,14 +17,32 @@ void start_program(struct Text * my_cpu, stack_t * stack1, const char * nameRead
 
     create_array_of_commands(buffer, my_cpu);
 
+    for(int i = 0; i < MAX_RAM_SIZE; i++)
+    {
+        my_cpu->RAM[i] = i+1;
+    }
+
+    printf("\n------------RAM------------------\n");
+    for(int i = 0; i < MAX_RAM_SIZE; i++)
+    {
+        printf("[%2d] = %20d; ", i, my_cpu->RAM[i]);
+    }
+    printf("\n---------------------------------\n"); 
+
+    printf("\n------------REGS-----------------\n");
+    for(int i = 0; i < 4; i++)
+    {
+        printf("[%2d] = %20d; ", i, my_cpu->Regs[i]);
+    }
+    printf("\n---------------------------------\n");    
 }
 
-#define DEF_CMD(name, num, arg, ...) \
-    case num:                        \
-        {                            \   
-            if(num == HLT) printf("HLT\n");\
-            __VA_ARGS__              \   
-            break;                   \       
+#define DEF_CMD(name, num, arg, ...)         \
+    case num:                                \
+        {                                    \   
+            if(num == HLT) printf("HLT\n");  \
+            __VA_ARGS__                      \   
+            break;                           \       
         }  
 
 void command_execution(struct Text * my_cpu, FILE * processor_output, stack_t * stack)
