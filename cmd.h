@@ -74,6 +74,7 @@ DEF_CMD(MUL, 5, 0,
             Elem_t b = 0;
             stackPop (stack, &a);
             stackPop (stack, &b);
+            printf("MUL: %d * %d = %d\n", b, a , b * a);
             stackPush (stack, b * a);
 })
 
@@ -97,7 +98,7 @@ DEF_CMD(OUT, 7, 0,
 DEF_CMD(HLT, 8, 0,
             {
             printf("goodbye");
-            //exit(0);
+            exit(0);
             break;
             })
 
@@ -134,6 +135,7 @@ DEF_CMD(DUP, 12, 0,
             stackPop (stack, &value);
             stackPush (stack, value);
             stackPush (stack, value);
+            printf("DUP %d\n", value);
             break;
             })
 
@@ -143,6 +145,7 @@ DEF_CMD(JB, 13, 1,
             Elem_t b = 0;
             stackPop (stack, &a);
             stackPop (stack, &b);
+            printf("JB? %d < %d, jb to %d\n", b, a, my_cpu->commands_array[ip + 1] - 1);            
             if(b < a) ip = my_cpu->commands_array[ip + 1] - 1;
             else ip++;
             
@@ -155,7 +158,7 @@ DEF_CMD(JBE, 14, 1,
             Elem_t b = 0;
             stackPop (stack, &a);
             stackPop (stack, &b);
-            if(b <= a) ip = my_cpu->commands_array[++ip] - 1;
+            if(b <= a) ip = my_cpu->commands_array[ip + 1] - 1;
             else ip++;
             break;               
             }) 
@@ -188,7 +191,8 @@ DEF_CMD(JE, 17, 1,
             Elem_t b = 0;
             stackPop (stack, &a);
             stackPop (stack, &b);
-            if(b == a) ip = my_cpu->commands_array[ip + 1] - 1 ;
+            printf("JE? %d == %d, je to %d\n", b, a, my_cpu->commands_array[ip + 1] - 1);
+            if(b == a) ip = my_cpu->commands_array[ip + 1] - 1;
             else ip++;
             break;               
             }) 
@@ -207,6 +211,8 @@ DEF_CMD(JNE, 18, 1,
 DEF_CMD(CALL, 19, 1,
             {
             stackPush (&call_stack, ip);
+
+            printf("CALL: %d \n",my_cpu->commands_array[ip + 1]);
             
             ip = my_cpu->commands_array[ip + 1] - 1;
 
@@ -242,7 +248,18 @@ DEF_CMD(SQRT, 21, 0,
             {
                 int value = 0;
                 stackPop  (stack, &value);
+                printf("SQRT: old_val = %d, new_val = %g\n", value, sqrt(value));                
                 stackPush (stack, sqrt(value));
+            }) 
+
+DEF_CMD(RDMP, 22, 0,
+            {
+                printf("\n------------REGS-----------------\n");
+                for(int i = 0; i < 4; i++)
+                {
+                    printf("[%2d] = %20d; ", i, my_cpu->Regs[i]);
+                }
+                printf("\n---------------------------------\n");                
             }) 
 
 

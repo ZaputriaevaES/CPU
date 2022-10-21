@@ -223,9 +223,10 @@ char * input_file_verification(char * buffer, struct Text * my_cpu)
 
     buffer += 2;
 
-    sscanf(buffer, "%d", &my_cpu->amount_of_cmd);
+    int k = 0;
+    sscanf(buffer, "%d%n", &my_cpu->amount_of_cmd, &k);
 
-    buffer += 3;
+    buffer += k + 1;
 
     //printf("%s\n", buffer);
 

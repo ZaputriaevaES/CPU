@@ -30,6 +30,7 @@ void finish_program(struct Text * original_file, struct label * array_of_labels,
 #define DEF_CMD(name, num, arg, ...) \
         else if(stricmp(cmd, #name) == 0)                                                                                                         \
             {                                                                                                                                     \
+                if(num == RDMP) printf("RDMP:\n");                                                                                                \
                 assembler->command_array[number_of_cmd++] = num;                                                                                  \
                 if (arg) get_args(original_file->strings[line] + n, &number_of_cmd, num, assembler);  \
             }    
@@ -497,6 +498,11 @@ char * command_decoder(int cmd)
                     return "ret";
                     break;  
                 }    
+            case SQRT:
+                {
+                    return "sqrt";
+                    break;  
+                }                 
             default:
                 return "no such command exists";
             }

@@ -1,0 +1,18 @@
+push 1
+for:
+call :funk
+dup
+push 13
+jbe :for
+hlt
+
+funk:
+dup
+dup
+mul
+out
+push 1
+add
+ret
+
+ 

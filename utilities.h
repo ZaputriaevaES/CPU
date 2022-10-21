@@ -34,10 +34,10 @@ enum commands{
 */
 
 enum regs{
-    REG_RAX = 1,
-    REG_RBX = 2,
-    REG_RCX = 3,
-    REG_RDX = 4
+    REG_RAX = 0,
+    REG_RBX = 1,
+    REG_RCX = 2,
+    REG_RDX = 3
     };
 
 #define SIGNATURE "CP"
